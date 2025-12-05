@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { 
-  NConfigProvider, 
-  NCard, 
-  NForm, 
-  NFormItem, 
-  NInput, 
-  NButton, 
+import {
+  NConfigProvider,
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NButton,
   NCheckbox,
+  useMessage,
   type GlobalThemeOverrides
 } from 'naive-ui'
-
+import { login } from '@/axios/LAR'
+import { useUserInfoStore } from '@/stores/userInfo'
 const router = useRouter()
-
+const message = useMessage()
+const userInfoStore = useUserInfoStore()
 // 主题配置
 const themeOverrides: GlobalThemeOverrides = {
   common: {
@@ -31,9 +34,34 @@ const formValue = ref({
   remember: false
 })
 
-// 登录处理（逻辑由用户实现）
+// 登录处理
 const handleLogin = () => {
-  console.log('Login clicked', formValue.value)
+  if (!formValue.value.username || !formValue.value.password) {
+    message.warning('请输入用户名和密码')
+    return
+  }
+
+  login({
+    username: formValue.value.username,
+    password: formValue.value.password,
+    remember: formValue.value.remember
+  }).then(res => {
+    if (res.code === 200) {
+      message.success('登录成功')
+ 
+      const e : {token: string,user:{id:number,username:string}} = JSON.parse(atob(res.data));
+      
+      userInfoStore.userInfo = e.user
+      // 保存 token
+      localStorage.setItem('x-token', e?.token)
+      router.push('/home')
+    } else {
+      message.error(res.msg || '登录失败')
+    }
+  }).catch(err => {
+    console.error(err)
+    message.error('登录请求失败')
+  })
 }
 
 const goToRegister = () => {
@@ -60,7 +88,7 @@ const goToForgotPassword = () => {
         <!-- 装饰性流体背景 -->
         <div class="fluid-bg"></div>
       </div>
-      
+
       <!-- 右侧登录表单区 -->
       <div class="form-section">
         <div class="form-wrapper">
@@ -68,57 +96,36 @@ const goToForgotPassword = () => {
             <h2 class="form-title">欢迎登录 New Project</h2>
             <p class="form-subtitle">请输入您的登录信息</p>
           </div>
-          
-          <n-form
-            ref="formRef"
-            :model="formValue"
-            size="large"
-            class="login-form"
-          >
+
+          <n-form ref="formRef" :model="formValue" size="large" class="login-form">
             <n-form-item path="username" label="邮箱或用户名">
-              <n-input 
-                v-model:value="formValue.username" 
-                placeholder="请输入您的邮箱或用户名"
-                class="custom-input"
-              />
+              <n-input v-model:value="formValue.username" placeholder="请输入您的邮箱或用户名" class="custom-input" />
             </n-form-item>
-            
+
             <n-form-item path="password" label="密码">
-              <n-input
-                v-model:value="formValue.password"
-                type="password"
-                show-password-on="click"
-                placeholder="请输入您的密码"
-                class="custom-input"
-              />
+              <n-input v-model:value="formValue.password" type="password" show-password-on="click" placeholder="请输入您的密码"
+                class="custom-input" />
             </n-form-item>
-            
+
             <div class="form-actions">
-            <n-checkbox v-model:checked="formValue.remember">记住登录状态</n-checkbox>
-            <a href="#" class="forgot-password" @click.prevent="goToForgotPassword">忘记密码？</a>
-          </div>
-          
-          <n-button 
-              type="primary" 
-              block 
-              size="large"
-              @click="handleLogin"
-              class="submit-btn"
-              :bordered="false"
-            >
+              <n-checkbox v-model:checked="formValue.remember">记住登录状态</n-checkbox>
+              <a href="#" class="forgot-password" @click.prevent="goToForgotPassword">忘记密码？</a>
+            </div>
+
+            <n-button type="primary" block size="large" @click="handleLogin" class="submit-btn" :bordered="false">
               登录
             </n-button>
 
             <div class="social-login">
-               <n-button ghost class="social-btn">
-                 <template #icon>G</template> Google
-               </n-button>
-               <n-button ghost class="social-btn">
-                 <template #icon></template> Apple
-               </n-button>
+              <n-button ghost class="social-btn">
+                <template #icon>G</template> Google
+              </n-button>
+              <n-button ghost class="social-btn">
+                <template #icon></template> Apple
+              </n-button>
             </div>
           </n-form>
-          
+
           <p class="signup-link">
             还没有账号？ <a href="#" @click.prevent="goToRegister">免费注册</a>
           </p>
@@ -142,7 +149,8 @@ const goToForgotPassword = () => {
 .brand-section {
   position: relative;
   width: 45%;
-  background-color: #0f172a; /* 深蓝黑 */
+  background-color: #0f172a;
+  /* 深蓝黑 */
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -200,7 +208,7 @@ const goToForgotPassword = () => {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: 
+  background:
     radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15), transparent 40%),
     radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1), transparent 30%);
   filter: blur(60px);
@@ -209,8 +217,13 @@ const goToForgotPassword = () => {
 }
 
 @keyframes fluidMove {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  100% { transform: translate(-10%, -10%) rotate(5deg); }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-10%, -10%) rotate(5deg);
+  }
 }
 
 /* 右侧表单区 */
@@ -327,7 +340,7 @@ const goToForgotPassword = () => {
   .brand-section {
     display: none;
   }
-  
+
   .form-section {
     padding: 24px;
   }

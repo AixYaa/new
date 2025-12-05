@@ -14,12 +14,22 @@ export interface RegisterRequest {
   password: string;
   confirmPassword: string;
 }
-
-export function login(data: LoginRequest) {
+// 解密登录响应体 
+export function login(data: LoginRequest) : Promise<{
+  code: number;
+  msg: string;
+  data: string
+}> {
   return instance.post('/client/login', data);
 }
 
-export function register(data: RegisterRequest) {
+export function register(data: RegisterRequest) : Promise<{
+  code: number;
+  msg: string;
+  data: {
+    token: string;
+  };
+}> {
   return instance.post('/client/register', data);
 }
 

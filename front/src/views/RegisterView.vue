@@ -82,42 +82,26 @@ const handleNextStep = (e: MouseEvent) => {
     if (!errors) {
       show.value = true
       sendEmail({email:formValue.value.email}).then(res=>{
-        show.value = false
-        // @ts-nocheck
         if(res.code===200){
-          message.success(res.msg)
+          message.success('验证码发送成功')
           currentStep.value = 2
         }
       }).catch(err=>{
-        show.value = false
         message.error(err.message)
       })
-    } else {
-      console.log(errors)
-      message.error('请检查输入信息是否正确')
     }
   })
 }
 
-// 第二步：提交验证码完成注册
-const handleFinalRegister = (e: MouseEvent) => {
-  e.preventDefault()
-  // 第二步只需要验证 code 字段，但在同一表单下比较麻烦，
-  // 简单起见我们直接判断 code 是否为空，或者也可以单独为第二步建一个 form
-  if(!formValue.value.code || formValue.value.code.length !== 6) {
-      message.warning('请输入6位验证码')
-      return
-  }
-
+// 第二步：提交验证码完成注册（逻辑由用户实现）
+const handleFinalRegister = () => {
   show.value = true
   register(formValue.value).then(res=>{
-    show.value = false
-    if(res.data.code===200){
+    if(res.code===200){
       message.success('注册成功')
-      router.push('/')
+      router.push('/home')
     }
   }).catch(err=>{
-    show.value = false
     message.error(err.message)
   })
 }

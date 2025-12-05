@@ -3,23 +3,88 @@ import { Encrypt } from '../../utils/Decorator';
 import { getDB } from '../../config/mongo';
 import { getRedis } from '../../config/redis'; // 引入 Redis
 import { 发送邮件 } from '../../utils/sendEmail'; // 引入邮件发送工具
-import { 生成JwtToken } from '../../utils/jwt';
+import { 生成JwtToken, 验证JwtToken } from '../../utils/jwt';
 import { 加密 } from '../../utils/Aes';
 
 export class ClientController {
-  static async 登录(req: Request, res: Response) {
-    // 获取 users 集合
-    const collection = getDB().collection('users');
-    // 查询所有用户 (示例)
-    const users = await collection.find({}).toArray();
+  @Encrypt
+  static async 登录(req: Request<null,{username:string,password:string}>, res: Response) {
+    const { username, password } = req.body;
+    
+    const collection = getDB().collection('用户');
+    
+    // 支持用户名或邮箱登录
+    const user = await collection.findOne({
+      $or: [
+        { username: username },
+        { email: username }
+      ]
+    });
+
+    if (!user) {
+      res.json({
+        code: 400,
+        msg: '用户不存在',
+        data: null
+      });
+      return;
+    }
+
+    // 验证密码
+    if (user.password !== 加密(password)) {
+      res.json({
+        code: 400,
+        msg: '密码错误',
+        data: null
+      });
+      return;
+    }
+
+    const token = 生成JwtToken({
+      userId: user._id.toString(),
+      username: user.username
+    });
 
     res.json({
       code: 200,
       msg: '登录成功',
       data: {
-        token: '123456',
-        dbUsers: users // 返回数据库里查到的数据
+        token: token,
+        user: {
+            username: user.username,
+            email: user.email
+        }
       }
+    });
+  }
+
+  static async verifyToken(req: Request, res: Response) {
+    const token = req.headers['x-token'] as string;
+    
+    if (!token) {
+      res.json({
+        code: 401,
+        msg: '未提供令牌',
+        data: null
+      });
+      return;
+    }
+
+    const payload = 验证JwtToken(token);
+    
+    if (!payload) {
+      res.json({
+        code: 401,
+        msg: '令牌无效或已过期',
+        data: null
+      });
+      return;
+    }
+
+    res.json({
+      code: 200,
+      msg: '验证通过',
+      data: payload
     });
   }
 
@@ -89,7 +154,6 @@ export class ClientController {
     });
   }
 
-  @Encrypt
   static async 注册发送邮件(req: Request<null,{email:string}>, res: Response) {
     const { email } = req.body;
     // 检查邮箱是否已存在
@@ -130,4 +194,6 @@ export class ClientController {
       data: null,
     });
   }
+
+
 }
