@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { 连接数据库 } from './config/mongo';
 import { 连接Redis } from './config/redis';
-import { 请求拦截器 } from './config/Interceptor';
-
+// 挂载路由
+import 所有 from './router/index';
 dotenv.config();
 
 const app: Express = express();
@@ -15,13 +15,12 @@ app.use(express.json());
 // 请求拦截器 检查请求是否包含 Authorization 头 如果没有则返回 401 错误
 app.use((req, res, next) => {
   // 拦截器 方法 
-  请求拦截器(req, res, next);
-  
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
 
+app.use('/api', 所有);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server is running!');

@@ -1,0 +1,12 @@
+// 登录路由
+import { Router } from 'express';
+import { ClientController } from '../../controllers/client/index';
+
+const router = Router();
+
+// 挂载登录路由
+router.post('/login', ClientController.登录);
+router.post('/register', ClientController.注册);
+
+router.get('/demo', ClientController.demo)
+export default router;
