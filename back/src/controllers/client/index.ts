@@ -1,26 +1,71 @@
 import { Request, Response } from 'express';
-import { Result } from '../../config/result';
 import { Encrypt } from '../../utils/Decorator';
+import { getDB } from '../../config/mongo';
+import { getRedis } from '../../config/redis'; // 引入 Redis
+import { 发送邮件 } from '../../utils/sendEmail'; // 引入邮件发送工具
+import { 生成JwtToken } from '../../utils/jwt';
+import { 加密 } from '../../utils/Aes';
 
 export class ClientController {
-  static 登录(req: Request, res: Response)  {
+  static async 登录(req: Request, res: Response) {
+    // 获取 users 集合
+    const collection = getDB().collection('users');
+    // 查询所有用户 (示例)
+    const users = await collection.find({}).toArray();
+
     res.json({
       code: 200,
       msg: '登录成功',
       data: {
         token: '123456',
+        dbUsers: users // 返回数据库里查到的数据
       }
     });
   }
 
-  static 注册(req: Request, res: Response) {
+  static async 注册(req: Request<null,{username:string,email:string,code:string,password:string,confirmPassword:string}>, res: Response) {
+    const { username,email,code,password,confirmPassword } = req.body;
+
+    const collection = getDB().collection('用户');
+
+    // 验证 code 
+    const 存储的验证码 = await getRedis().get(`email:${email}`);
+    if (!存储的验证码 || 存储的验证码 !== code) {
       res.json({
-      code: 200,
-      msg: '注册成功',
-      data: {
-        token: '123456',
-      }
+        code: 400,
+        msg: '验证码错误',
+        data: null,
+      });
+      return;
+    }
+
+    const 插入结果 = await collection.insertOne({
+      username,
+      email,
+      password: 加密(password),
     });
+
+    const 令牌 = 生成JwtToken({
+      userId: 插入结果.insertedId.toString(),
+      username,
+    });
+
+    if(插入结果.insertedId){
+      res.json({
+        code: 200,
+        msg: '注册成功',
+        data: {
+          token: 令牌,
+        },
+      });
+    }else{
+      res.json({
+        code: 400,
+        msg: '注册失败',
+        data: null,
+      });
+    }
+
   }
 
   static 注销(req: Request, res: Response) {
@@ -31,6 +76,7 @@ export class ClientController {
     });
   }
 
+  @Encrypt
   static 获取用户信息(req: Request, res: Response) {
     res.json({
       code: 200,
@@ -44,15 +90,44 @@ export class ClientController {
   }
 
   @Encrypt
-  static demo(req: Request, res: Response) {
+  static async 注册发送邮件(req: Request<null,{email:string}>, res: Response) {
+    const { email } = req.body;
+    // 检查邮箱是否已存在
+    const collection = getDB().collection('用户');
+    const 存在用户 = await collection.findOne({ email });
+    if (存在用户) {
+      res.json({
+        code: 400,
+        msg: '邮箱已存在',
+        data: null,
+      });
+      return;
+    }
+
+    // 生成随机验证码 数字+字母
+    const 验证码 = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    // 如果这个用户修改了信息 再发送验证码 就需要判断是否有旧验证码 如果有 就直接返回成功 让用户使用旧的验证码继续注册
+    const 旧验证码 = await getRedis().get(`email:${email}`);
+    if(旧验证码){
+      res.json({
+        code: 200,
+        msg: '使用旧验证码注册 如果需要新验证码 请稍后重试',
+        data: null,
+      });
+      return;
+    }
+
+    // 保存验证码到 Redis 中，过期时间为 5 分钟
+    await getRedis().setex(`email:${email}`, 300, 验证码);
+
+    // 发送验证码到用户邮箱
+    await 发送邮件(email,'欢迎加入我们','verification',{code:验证码});
+
     res.json({
       code: 200,
-      msg: 'client demo成功',
-      data: {
-        id: 123456,
-        name: '张三',
-        email: 'zhangsan@example.com',
-      },
+      msg: '验证码发送成功',
+      data: null,
     });
   }
 }

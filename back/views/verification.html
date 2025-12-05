@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证您的邮箱</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+            background-color: #f6f9fc;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            color: #333333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 32px 24px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .logo-text {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            line-height: 48px;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 800;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .content {
+            padding: 40px 32px;
+            text-align: center;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #1e293b;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .description {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .code-container {
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 0 auto 32px;
+            max-width: 300px;
+        }
+        .code {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 36px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: 8px;
+            margin: 0;
+        }
+        .expiry-note {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 16px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 0 32px;
+        }
+        .footer {
+            padding: 24px 32px;
+            text-align: center;
+            background-color: #f8fafc;
+        }
+        .footer p {
+            margin: 0;
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        .button {
+            display: inline-block;
+            background-color: #0f172a;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-text">N</div>
+            <h1>New Project</h1>
+        </div>
+        <div class="content">
+            <div class="greeting">您好，欢迎加入！</div>
+            <p class="description">
+                感谢您注册 New Project。为了保障您的账号安全，请使用下方的验证码完成邮箱验证。
+            </p>
+            
+            <div class="code-container">
+                <div class="code">{{code}}</div>
+            </div>
+            
+            <p class="expiry-note">
+                • 此验证码将在 5 分钟后失效<br>
+                • 如果这不是您的操作，请忽略此邮件
+            </p>
+        </div>
+        <div class="divider"></div>
+        <div class="footer">
+            <p>此邮件由系统自动发送，请勿回复。</p>
+            <p>&copy; 2024 New Project. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -3,12 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { 
   NConfigProvider, 
-  NCard, 
   NForm, 
   NFormItem, 
   NInput, 
   NButton, 
-  NCheckbox,
   type GlobalThemeOverrides
 } from 'naive-ui'
 
@@ -20,28 +18,21 @@ const themeOverrides: GlobalThemeOverrides = {
     primaryColor: '#63e2b7',
     primaryColorHover: '#7fe7c4',
     primaryColorPressed: '#5acea7',
-  },
-  // 移除之前过于定制化的深色配置，回归默认清爽风格
+  }
 }
 
 // 表单数据
 const formValue = ref({
-  username: '',
-  password: '',
-  remember: false
+  email: ''
 })
 
-// 登录处理（逻辑由用户实现）
-const handleLogin = () => {
-  console.log('Login clicked', formValue.value)
+const handleReset = () => {
+  console.log('Reset clicked', formValue.value)
+  // 重置逻辑...
 }
 
-const goToRegister = () => {
-  router.push('/register')
-}
-
-const goToForgotPassword = () => {
-  router.push('/forgot-password')
+const goToLogin = () => {
+  router.push('/')
 }
 </script>
 
@@ -54,19 +45,19 @@ const goToForgotPassword = () => {
           <div class="logo-circle">
             <span class="logo-text">N</span>
           </div>
-          <h1 class="brand-title">New Project</h1>
-          <p class="brand-slogan">Experience the next generation of management.</p>
+          <h1 class="brand-title">忘记密码</h1>
+          <p class="brand-slogan">输入您的邮箱，我们将发送重置密码的链接</p>
         </div>
         <!-- 装饰性流体背景 -->
         <div class="fluid-bg"></div>
       </div>
       
-      <!-- 右侧登录表单区 -->
+      <!-- 右侧表单区 -->
       <div class="form-section">
         <div class="form-wrapper">
           <div class="form-header">
-            <h2 class="form-title">欢迎登录 New Project</h2>
-            <p class="form-subtitle">请输入您的登录信息</p>
+            <h2 class="form-title">重置密码</h2>
+            <p class="form-subtitle">输入您的邮箱，我们将发送重置密码的链接</p>
           </div>
           
           <n-form
@@ -75,52 +66,28 @@ const goToForgotPassword = () => {
             size="large"
             class="login-form"
           >
-            <n-form-item path="username" label="邮箱或用户名">
+            <n-form-item path="email" label="邮箱">
               <n-input 
-                v-model:value="formValue.username" 
-                placeholder="请输入您的邮箱或用户名"
+                v-model:value="formValue.email" 
+                placeholder="请输入邮箱"
                 class="custom-input"
               />
             </n-form-item>
             
-            <n-form-item path="password" label="密码">
-              <n-input
-                v-model:value="formValue.password"
-                type="password"
-                show-password-on="click"
-                placeholder="请输入您的密码"
-                class="custom-input"
-              />
-            </n-form-item>
-            
-            <div class="form-actions">
-            <n-checkbox v-model:checked="formValue.remember">记住登录状态</n-checkbox>
-            <a href="#" class="forgot-password" @click.prevent="goToForgotPassword">忘记密码？</a>
-          </div>
-          
-          <n-button 
+            <n-button 
               type="primary" 
               block 
               size="large"
-              @click="handleLogin"
+              @click="handleReset"
               class="submit-btn"
               :bordered="false"
             >
-              登录
+              发送重置链接
             </n-button>
-
-            <div class="social-login">
-               <n-button ghost class="social-btn">
-                 <template #icon>G</template> Google
-               </n-button>
-               <n-button ghost class="social-btn">
-                 <template #icon></template> Apple
-               </n-button>
-            </div>
           </n-form>
           
           <p class="signup-link">
-            还没有账号？ <a href="#" @click.prevent="goToRegister">免费注册</a>
+            已记住密码？ <a href="#" @click.prevent="goToLogin">登录</a>
           </p>
         </div>
       </div>
@@ -138,11 +105,11 @@ const goToForgotPassword = () => {
   background-color: #ffffff;
 }
 
-/* 左侧品牌区 - 高级感核心 */
+/* 左侧品牌区 */
 .brand-section {
   position: relative;
   width: 45%;
-  background-color: #0f172a; /* 深蓝黑 */
+  background-color: #0f172a;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -267,20 +234,6 @@ const goToForgotPassword = () => {
   box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.05);
 }
 
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.forgot-password {
-  color: #0f172a;
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
 .submit-btn {
   height: 48px;
   font-weight: 600;
@@ -293,21 +246,6 @@ const goToForgotPassword = () => {
 
 .submit-btn:hover {
   background-color: #1e293b;
-}
-
-.social-login {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.social-btn {
-  height: 44px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-weight: 500;
-  color: #334155;
 }
 
 .signup-link {

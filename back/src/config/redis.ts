@@ -4,11 +4,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+let client: Redis;
+
 // 返回 Redis 客户端
 // REDIS_HOST=localhost
 // REDIS_PORT=6379
 // REDIS_PASSWORD=123456
 export async function 连接Redis() {
+    if (client) {
+        return client;
+    }
     const Redis主机 = process.env.REDIS_HOST || 'localhost';
     const Redis端口 = Number(process.env.REDIS_PORT) || 6379;
     const Redis密码 = process.env.REDIS_PASSWORD;
@@ -24,7 +29,7 @@ export async function 连接Redis() {
         options.password = Redis密码;
     }
 
-    const client = new Redis(options);
+    client = new Redis(options);
 
     // 添加错误监听，防止未捕获的异常导致程序崩溃
     client.on('error', (err) => {
@@ -39,4 +44,12 @@ export async function 连接Redis() {
         console.error('Redis 连接失败，请检查配置或服务是否启动:', error);
         throw error;
     }
+}
+
+// 导出一个获取 Redis 实例的函数
+export function getRedis(): Redis {
+    if (!client) {
+        throw new Error('Redis 未连接，请先调用 连接Redis()');
+    }
+    return client;
 }

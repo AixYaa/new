@@ -8,5 +8,5 @@ const router = Router();
 router.post('/login', ClientController.登录);
 router.post('/register', ClientController.注册);
 
-router.get('/demo', ClientController.demo)
+router.post('/send-email', ClientController.注册发送邮件)
 export default router;
