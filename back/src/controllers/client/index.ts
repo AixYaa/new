@@ -51,6 +51,7 @@ export class ClientController {
       data: {
         token: token,
         user: {
+            id: user._id.toString(),
             username: user.username,
             email: user.email
         }

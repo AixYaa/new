@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { ref } from 'vue'
 
 export const useUserInfoStore = defineStore('userInfo', () => {
-    const userInfo: {id:number,username:string} = reactive({
+    const userInfo = ref<{id:number,username:string}>({
         id: 0,
         username: ''
     })
@@ -10,4 +10,6 @@ export const useUserInfoStore = defineStore('userInfo', () => {
     return {
         userInfo
     }
+}, {
+    persist: true
 })

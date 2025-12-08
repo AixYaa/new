@@ -40,3 +40,48 @@ export function sendEmail(data: { email: string }) : Promise<{
 }> {
   return instance.post('/client/send-email', data);
 }
+
+// 项目管理相关接口
+export interface Project {
+  _id: string;
+  项目名称: string;
+  项目描述: string;
+  后端地址?: string; // 新增字段
+  上传时间: string;
+  状态: 'deployed' | 'processing' | 'failed';
+  预览地址: string;
+}
+
+export function uploadProject(formData: FormData) : Promise<{
+  code: number;
+  msg: string;
+  data: Project;
+}> {
+  return instance.post('/client/project/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+}
+
+export function getProjectList() : Promise<{
+  code: number;
+  msg: string;
+  data: Project[];
+}> {
+  return instance.get('/client/project/list');
+}
+
+export function updateProject(id: string, data: any) : Promise<{
+  code: number;
+  msg: string;
+}> {
+  return instance.put(`/client/project/${id}`, data);
+}
+
+export function deleteProject(id: string) : Promise<{
+  code: number;
+  msg: string;
+}> {
+  return instance.delete(`/client/project/${id}`);
+}

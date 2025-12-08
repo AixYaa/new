@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import { instance } from '../axios'
-
+import { useUserInfoStore } from '../stores/userInfo'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -24,20 +24,43 @@ const router = createRouter({
       path: '/home',
       name: 'home',
       component: () => import('../views/HomeView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
+      redirect: '/home/dashboard',
+      children: [
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('../views/main/DashboardView.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: 'projects',
+          name: 'projects',
+          component: () => import('../views/main/ProjectManageView.vue'),
+          meta: { requiresAuth: true }
+        }
+      ]
     },
   ],
 })
 
 // 路由守卫
 router.beforeEach(async (to, from, next) => {
+  const userInfoStore = useUserInfoStore()
   // 检查路由是否需要认证
+  if (to.name === 'login' || to.name === 'register' || to.name === 'forgot-password') {
+    // 清除 x-token 避免未登录状态下访问受保护路由
+    localStorage.removeItem('x-token')
+    
+    // 重置 userInfo 状态
+    userInfoStore.userInfo = {
+        id: 0,
+        username: ''
+    }
+
+    next()
+    return
+  }
   if (to.meta.requiresAuth) {
     const token = localStorage.getItem('x-token')
     
